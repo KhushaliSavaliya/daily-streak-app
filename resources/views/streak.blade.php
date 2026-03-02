@@ -41,7 +41,6 @@
                 origin: { y: 0.6 },
                 colors: ['#6366f1', '#10b981', '#ffffff']
             });
-            // Here you would normally trigger an AJAX call to update the DB
             this.innerText = "Contribution Pushed!";
             this.classList.replace('bg-indigo-600', 'bg-green-600');
         };

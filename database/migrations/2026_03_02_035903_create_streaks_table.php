@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('streaks', function (Blueprint $table) {
             $table->id();
             $table->integer('count')->default(0);
-            $table->integer('freezes_available')->default(1); // Advanced feature
+            $table->integer('freezes_available')->default(1); 
             $table->date('last_commit_date')->nullable();
             $table->timestamps();
         });
