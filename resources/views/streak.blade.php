@@ -34,15 +34,40 @@
     </div>
 
     <script>
-        document.getElementById('markDone').onclick = function() {
-            confetti({
-                particleCount: 100,
-                spread: 70,
-                origin: { y: 0.6 },
-                colors: ['#6366f1', '#10b981', '#ffffff']
-            });
-            this.innerText = "Contribution Pushed!";
-            this.classList.replace('bg-indigo-600', 'bg-green-600');
+        document.getElementById('markDone').onclick = async function() {
+            const btn = this;
+            
+            try {
+                // Call the backend to save progress
+                const response = await fetch('/streak/update', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Visual feedback
+                    confetti({
+                        particleCount: 150,
+                        spread: 70,
+                        origin: { y: 0.6 },
+                        colors: ['#6366f1', '#10b981', '#ffffff']
+                    });
+
+                    btn.innerText = "Contribution Pushed!";
+                    btn.classList.replace('bg-indigo-600', 'bg-green-600');
+                    btn.disabled = true;
+                    
+                    // Update count in UI
+                    document.querySelector('.text-7xl').innerText = data.count;
+                }
+            } catch (error) {
+                console.error("Failed to update streak", error);
+            }
         };
     </script>
 </body>
