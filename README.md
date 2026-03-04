@@ -1,59 +1,179 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+Here is a **clean and professional `README.md`** for your **Daily Streak App Laravel project**. You can copy this directly into your repository.
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+---
 
-## About Laravel
+```markdown
+# 🔥 Daily Streak Management App
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+A simple **Laravel-based daily streak tracker** that helps track consistency like GitHub contributions.  
+Users can mark their daily progress and maintain a streak with a clean and modern UI.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+The project includes **streak tracking, freeze days, and a GitHub-style contribution feel**.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## ✨ Features
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- 📅 Track daily streaks
+- ❄️ Freeze system to prevent streak loss
+- 🎉 Confetti animation when completing a contribution
+- ⚡ Fast UI using TailwindCSS
+- 📊 Contribution-style visual indicator
+- 🔐 CSRF protected API request
+- 💡 Minimal and modern interface
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## 🖼 Preview
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+The app displays:
 
-### Premium Partners
+- Current streak count
+- Streak status (Completed / Pending)
+- Freeze balance
+- Contribution deployment button
+- Visual contribution squares
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+---
 
-## Contributing
+## 🛠 Tech Stack
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- **Laravel**
+- **Blade Templates**
+- **TailwindCSS**
+- **JavaScript (Fetch API)**
+- **Canvas Confetti**
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 📂 Project Structure
 
-## Security Vulnerabilities
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+daily-streak-app
+│
+├── app
+├── bootstrap
+├── config
+├── database
+├── public
+├── resources
+│   └── views
+│       └── streak.blade.php
+├── routes
+│   └── web.php
+├── storage
+└── vendor
 
-## License
+````
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## ⚙️ Installation
+
+### 1️⃣ Clone the repository
+
+```bash
+git clone https://github.com/KhushaliSavaliya/daily-streak-app.git
+````
+
+### 2️⃣ Go to project folder
+
+```bash
+cd daily-streak-app
+```
+
+### 3️⃣ Install dependencies
+
+```bash
+composer install
+```
+
+### 4️⃣ Copy environment file
+
+```bash
+cp .env.example .env
+```
+
+### 5️⃣ Generate app key
+
+```bash
+php artisan key:generate
+```
+
+### 6️⃣ Setup database
+
+Update `.env` with your database credentials.
+
+Then run:
+
+```bash
+php artisan migrate
+```
+
+### 7️⃣ Start development server
+
+```bash
+php artisan serve
+```
+
+Open in browser:
+
+```
+http://127.0.0.1:8000
+```
+
+---
+
+## 🚀 How It Works
+
+1. The user opens the dashboard.
+2. Current streak and status are displayed.
+3. User clicks **Deploy Contribution**.
+4. A request is sent to:
+
+```
+POST /streak/update
+```
+
+5. The backend updates the streak count.
+6. UI updates with animation and confetti.
+
+---
+
+## 📸 UI Features
+
+* Dark mode design
+* TailwindCSS styling
+* Contribution progress indicators
+* Interactive animations
+
+---
+
+## 📌 Future Improvements
+
+* User authentication
+* Multiple users
+* Streak history
+* Calendar view
+* Mobile responsive improvements
+* GitHub style contribution graph
+
+---
+
+## 👩‍💻 Author
+
+**Khushali Savaliya**
+
+GitHub
+[https://github.com/KhushaliSavaliya](https://github.com/KhushaliSavaliya)
+
+---
+
+## 📄 License
+
+This project is open-source and available under the **MIT License**.
+
+```
+
+---
