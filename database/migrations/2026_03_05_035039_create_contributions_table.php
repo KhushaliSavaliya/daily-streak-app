@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('streaks', function (Blueprint $table) {
+        Schema::create('contributions', function (Blueprint $table) {
             $table->id();
-            $table->integer('count')->default(0);
-            $table->integer('best_streak')->default(0); // <--- Add this
-            $table->integer('freezes_available')->default(1); 
-            $table->date('last_commit_date')->nullable();
+            $table->date('day'); // e.g., 2024-05-20
+            $table->integer('count')->default(0); // Allow multiple "pushes" per day
             $table->timestamps();
         });
     }
@@ -26,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('streaks');
+        Schema::dropIfExists('contributions');
     }
 };

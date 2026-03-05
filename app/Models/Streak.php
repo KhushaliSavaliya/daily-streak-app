@@ -8,6 +8,7 @@ class Streak extends Model
 {
     protected $fillable = [ 
         'count',
+        'best_streak',
         'freezes_available',
         'last_commit_date',
     ];

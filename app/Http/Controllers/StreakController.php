@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Contribution;
 use App\Models\Streak;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -11,19 +12,17 @@ class StreakController extends Controller
     public function index()
     {
         $streak = Streak::firstOrCreate(['id' => 1]);
+        
+        // 1. Handle Streak Logic (Breaks/Freezes)
         $today = now()->startOfDay();
         $lastDate = $streak->last_commit_date ? Carbon::parse($streak->last_commit_date)->startOfDay() : null;
-
         $status = "Pending";
 
-        if ($lastDate) {
-            if ($lastDate->equalTo($today)) {
-                $status = "Completed";
-            } elseif ($lastDate->diffInDays($today) > 1) {
-                // Check if we can use a freeze for the missed day(s)
+        if ($lastDate && !$lastDate->equalTo($today)) {
+            $diff = $lastDate->diffInDays($today);
+            if ($diff > 1) {
                 if ($streak->freezes_available > 0) {
                     $streak->decrement('freezes_available');
-                    // Move last_commit to yesterday so the streak continues
                     $streak->update(['last_commit_date' => $today->copy()->subDay()]);
                     $status = "Frozen (Protected)";
                 } else {
@@ -31,23 +30,46 @@ class StreakController extends Controller
                     $status = "Broken";
                 }
             }
+        } elseif ($lastDate && $lastDate->equalTo($today)) {
+            $status = "Completed";
         }
 
-        return view('streak', compact('streak', 'status'));
+        // 2. Fetch Heatmap Data (Last 28 days/4 weeks)
+        $history = Contribution::where('day', '>', now()->subDays(28))
+            ->pluck('count', 'day')
+            ->toArray();
+
+        return view('streak', compact('streak', 'status', 'history'));
     }
 
     public function store()
     {
         $streak = Streak::find(1);
-        $today = now()->startOfDay();
-        $lastDate = $streak->last_commit_date ? Carbon::parse($streak->last_commit_date)->startOfDay() : null;
+        $todayDate = now()->format('Y-m-d');
 
-        // Only increment if not already done today
-        if (!$lastDate || $lastDate->lessThan($today)) {
+        // Update Heatmap
+        $contribution = Contribution::firstOrCreate(['day' => $todayDate]);
+        $contribution->increment('count');
+
+        // Update Main Streak
+        $lastDate = $streak->last_commit_date ? Carbon::parse($streak->last_commit_date)->format('Y-m-d') : null;
+
+        if ($lastDate !== $todayDate) {
             $streak->increment('count');
-            $streak->update(['last_commit_date' => now()]);
+            
+            // Track Best Streak
+            if ($streak->count > $streak->best_streak) {
+                $streak->best_streak = $streak->count;
+            }
+            
+            $streak->last_commit_date = now();
+            $streak->save();
         }
 
-        return response()->json(['success' => true, 'count' => $streak->count]);
+        return response()->json([
+            'success' => true, 
+            'count' => $streak->count,
+            'best' => $streak->best_streak
+        ]);
     }
 }
