@@ -34,10 +34,12 @@ class StreakController extends Controller
             $status = "Completed";
         }
 
-        // 2. Fetch Heatmap Data (Last 28 days/4 weeks)
-        $history = Contribution::where('day', '>', now()->subDays(28))
-            ->pluck('count', 'day')
-            ->toArray();
+        $history = [];
+        for ($i = 13; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            // Get count from DB or default to 0
+            $history[$date] = Contribution::where('day', $date)->value('count') ?? 0;
+        }
 
         return view('streak', compact('streak', 'status', 'history'));
     }

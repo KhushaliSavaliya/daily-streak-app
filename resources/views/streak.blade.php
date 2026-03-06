@@ -32,10 +32,28 @@
             </button>
         </div>
 
-        <div class="mt-8 flex justify-between gap-1 opacity-50">
-            @foreach (range(1, 14) as $day)
-                <div class="w-4 h-4 rounded-sm {{ $day > 10 ? 'bg-indigo-500' : 'bg-slate-700' }}"></div>
-            @endforeach
+        <div class="mt-8">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-xs font-bold uppercase text-slate-500 tracking-tighter">Last 2 weeks</h3>
+                <span class="text-[10px] text-slate-500">More activity = Brighter</span>
+            </div>
+            <div class="flex justify-between gap-1">
+                @foreach ($history as $date => $count)
+                    @php
+                        // Determine color intensity
+                        $color = 'bg-slate-700'; // Default empty
+                        if ($count > 0 && $count <= 2) $color = 'bg-indigo-900';
+                        if ($count > 2 && $count <= 5) $color = 'bg-indigo-600';
+                        if ($count > 5) $color = 'bg-indigo-400';
+                        
+                        $isToday = $date == now()->format('Y-m-d');
+                    @endphp
+                    
+                    <div title="{{ $date }}: {{ $count }} contributions" 
+                        class="w-5 h-5 rounded-sm {{ $color }} {{ $isToday ? 'ring-2 ring-white/30' : '' }} transition-all hover:scale-110">
+                    </div>
+                @endforeach
+            </div>
         </div>
     </div>
 
@@ -54,6 +72,12 @@
 
                 if (response.ok) {
                     const data = await response.json();
+                    const todaySquare = document.querySelector('.ring-white\\/30');
+                    if (todaySquare) {
+                        // Change color to indicate progress immediately
+                        todaySquare.classList.remove('bg-slate-700');
+                        todaySquare.classList.add('bg-indigo-900');
+                    }
 
                     confetti({
                         particleCount: 150,
