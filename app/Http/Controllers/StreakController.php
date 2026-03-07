@@ -64,6 +64,33 @@ class StreakController extends Controller
                 $streak->best_streak = $streak->count;
             }
             
+            // Achievement Logic
+            $milestones = [
+                7 => ['name' => 'Week Warrior', 'reward' => 1],
+                30 => ['name' => 'Monthly Master', 'reward' => 3],
+                100 => ['name' => 'Centurion', 'reward' => 10],
+            ];
+
+            $newAchievement = null;
+            if (isset($milestones[$streak->count])) {
+                $milestone = $milestones[$streak->count];
+                $currentAchievements = $streak->achievements ?? [];
+                
+                // check if already awarded (though based on count it shouldn't be, but safe check)
+                $alreadyAwarded = collect($currentAchievements)->contains('name', $milestone['name']);
+
+                if (!$alreadyAwarded) {
+                    $streak->increment('freezes_available', $milestone['reward']);
+                    $currentAchievements[] = [
+                        'name' => $milestone['name'],
+                        'earned_at' => now()->format('Y-m-d'),
+                        'count' => $streak->count
+                    ];
+                    $streak->achievements = $currentAchievements;
+                    $newAchievement = $milestone['name'];
+                }
+            }
+            
             $streak->last_commit_date = now();
             $streak->save();
         }
@@ -71,7 +98,9 @@ class StreakController extends Controller
         return response()->json([
             'success' => true, 
             'count' => $streak->count,
-            'best' => $streak->best_streak
+            'best' => $streak->best_streak,
+            'freezes' => $streak->freezes_available,
+            'new_achievement' => $newAchievement ?? null
         ]);
     }
 }

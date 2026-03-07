@@ -11,5 +11,10 @@ class Streak extends Model
         'best_streak',
         'freezes_available',
         'last_commit_date',
+        'achievements',
+    ];
+
+    protected $casts = [
+        'achievements' => 'array',
     ];
 }
