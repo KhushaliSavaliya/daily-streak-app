@@ -34,11 +34,18 @@ class StreakController extends Controller
             $status = "Completed";
         }
 
+        $startDate = now()->subDays(364)->format('Y-m-d');
+        $endDate = now()->format('Y-m-d');
+
+        // Fetch all contributions for the last 365 days in one query
+        $contributions = Contribution::whereBetween('day', [$startDate, $endDate])
+            ->pluck('count', 'day')
+            ->toArray();
+
         $history = [];
-        for ($i = 13; $i >= 0; $i--) {
+        for ($i = 364; $i >= 0; $i--) {
             $date = now()->subDays($i)->format('Y-m-d');
-            // Get count from DB or default to 0
-            $history[$date] = Contribution::where('day', $date)->value('count') ?? 0;
+            $history[$date] = $contributions[$date] ?? 0;
         }
 
         return view('streak', compact('streak', 'status', 'history'));

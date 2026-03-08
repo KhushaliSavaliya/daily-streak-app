@@ -65,28 +65,48 @@
 
         <div class="mt-8">
             <div class="flex justify-between items-center mb-2">
-                <h3 class="text-xs font-bold uppercase text-slate-500 tracking-tighter">Last 2 weeks</h3>
+                <h3 class="text-xs font-bold uppercase text-slate-500 tracking-tighter">Last 365 days</h3>
                 <span class="text-[10px] text-slate-500">More activity = Brighter</span>
             </div>
-            <div class="flex justify-between gap-1">
-                @foreach ($history as $date => $count)
-                    @php
-                        // Determine color intensity
-                        $color = 'bg-slate-700'; // Default empty
-                        if ($count > 0 && $count <= 2) $color = 'bg-indigo-900';
-                        if ($count > 2 && $count <= 5) $color = 'bg-indigo-600';
-                        if ($count > 5) $color = 'bg-indigo-400';
+            
+            <div class="overflow-x-auto pb-2 custom-scrollbar">
+                <div class="grid grid-rows-7 grid-flow-col gap-1 w-max">
+                    @foreach ($history as $date => $count)
+                        @php
+                            // Determine color intensity
+                            $color = 'bg-slate-700'; // Default empty
+                            if ($count > 0 && $count <= 2) $color = 'bg-indigo-900';
+                            if ($count > 2 && $count <= 5) $color = 'bg-indigo-600';
+                            if ($count > 5) $color = 'bg-indigo-400';
+                            
+                            $isToday = $date == now()->format('Y-m-d');
+                        @endphp
                         
-                        $isToday = $date == now()->format('Y-m-d');
-                    @endphp
-                    
-                    <div title="{{ $date }}: {{ $count }} contributions" 
-                        class="w-5 h-5 rounded-sm {{ $color }} {{ $isToday ? 'ring-2 ring-white/30' : '' }} transition-all hover:scale-110">
-                    </div>
-                @endforeach
+                        <div title="{{ $date }}: {{ $count }} contributions" 
+                            class="w-3 h-3 rounded-[2px] {{ $color }} {{ $isToday ? 'ring-[1px] ring-white/50' : '' }} transition-colors hover:ring-1 hover:ring-white">
+                        </div>
+                    @endforeach
+                </div>
             </div>
         </div>
     </div>
+    
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1e293b; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b; 
+        }
+    </style>
 
     <script>
         document.getElementById('markDone').onclick = async function() {
