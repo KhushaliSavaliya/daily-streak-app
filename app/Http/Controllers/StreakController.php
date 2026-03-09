@@ -99,6 +99,19 @@ class StreakController extends Controller
             }
             
             $streak->last_commit_date = now();
+            
+            // Award XP
+            $streak->xp += 10;
+            $leveledUp = false;
+            $nextLevelThreshold = $streak->getXpForNextLevel();
+            
+            if ($streak->xp >= $nextLevelThreshold) {
+                $streak->level++;
+                $leveledUp = true;
+                // Bonus for leveling up? Maybe a freeze?
+                $streak->increment('freezes_available');
+            }
+
             $streak->save();
         }
 
@@ -107,7 +120,12 @@ class StreakController extends Controller
             'count' => $streak->count,
             'best' => $streak->best_streak,
             'freezes' => $streak->freezes_available,
-            'new_achievement' => $newAchievement ?? null
+            'new_achievement' => $newAchievement ?? null,
+            'xp' => $streak->xp,
+            'level' => $streak->level,
+            'leveled_up' => $leveledUp,
+            'next_level_xp' => $streak->getXpForNextLevel(),
+            'xp_progress' => $streak->getLevelProgress()
         ]);
     }
 }

@@ -10,24 +10,44 @@
 <body class="bg-slate-900 flex items-center justify-center h-screen text-white">
 
     <div class="bg-slate-800 p-8 rounded-3xl shadow-2xl w-96 border border-slate-700 relative overflow-hidden">
-        <div id="freezeBadge"
-            class="absolute top-4 right-4 flex items-center gap-1 bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full text-xs font-bold border border-blue-500/30">
-            ❄️ {{ $streak->freezes_available }} Freezes
+        <div class="flex justify-between items-center mb-6">
+            <div id="freezeBadge"
+                class="flex items-center gap-1 bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full text-xs font-bold border border-blue-500/30">
+                ❄️ {{ $streak->freezes_available }} Freezes
+            </div>
+            <div id="levelBadge"
+                class="flex items-center gap-1 bg-purple-500/20 text-purple-400 px-3 py-1 rounded-full text-xs font-bold border border-purple-500/30">
+                ⭐ Level {{ $streak->level }}
+            </div>
         </div>
 
         <div class="text-center">
             <h2 class="text-slate-400 uppercase tracking-widest text-xs font-bold mb-1">Current Streak</h2>
             <div class="text-7xl font-black text-indigo-500 mb-2">{{ $streak->count }}</div>
-            <p class="text-slate-400 text-sm mb-6">Days of consistency</p>
+            <p class="text-slate-400 text-sm mb-4">Days of consistency</p>
+
+            <div class="flex justify-center gap-4 mb-6">
+                <div class="text-center">
+                    <div class="text-xs text-slate-500 font-bold uppercase">Best</div>
+                    <div class="text-lg font-bold text-slate-300">{{ $streak->best_streak }}</div>
+                </div>
+                <div class="border-l border-slate-700"></div>
+                <div class="text-center">
+                    <div class="text-xs text-slate-500 font-bold uppercase">XP</div>
+                    <div class="text-lg font-bold text-slate-300">{{ $streak->xp }}</div>
+                </div>
+            </div>
 
             @php
                 $milestones = [7, 30, 100];
                 $nextMilestone = collect($milestones)->first(fn($m) => $m > $streak->count) ?? 365;
                 $prevMilestone = collect($milestones)->reverse()->first(fn($m) => $m <= $streak->count) ?? 0;
                 $progress = (($streak->count - $prevMilestone) / ($nextMilestone - $prevMilestone)) * 100;
+                
+                $xpProgress = $streak->getLevelProgress();
             @endphp
 
-            <div class="mb-6">
+            <div class="mb-4">
                 <div class="flex justify-between text-[10px] text-slate-500 font-bold uppercase mb-1">
                     <span>Next Milestone: {{ $nextMilestone }} Days</span>
                     <span>{{ round($progress) }}%</span>
@@ -37,7 +57,17 @@
                 </div>
             </div>
 
-            <div class="flex items-center justify-center gap-2 mb-8">
+            <div class="mb-6">
+                <div class="flex justify-between text-[10px] text-slate-500 font-bold uppercase mb-1">
+                    <span>Level Progress</span>
+                    <span id="xpPercent">{{ round($xpProgress) }}%</span>
+                </div>
+                <div class="w-full bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                    <div id="xpBar" class="bg-purple-500 h-full transition-all duration-1000" style="width: {{ $xpProgress }}%"></div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-center gap-2 mb-6">
                 <span
                     class="w-3 h-3 rounded-full {{ $status == 'Completed' ? 'bg-green-500 animate-pulse' : 'bg-yellow-500' }}"></span>
                 <span class="text-sm font-medium">{{ $status }}</span>
@@ -137,7 +167,18 @@
                         colors: ['#6366f1', '#10b981', '#f59e0b']
                     });
 
-                    if (data.new_achievement) {
+                    if (data.leveled_up) {
+                        setTimeout(() => {
+                            confetti({
+                                particleCount: 200,
+                                spread: 100,
+                                origin: { y: 0.6 },
+                                colors: ['#a855f7', '#ffffff']
+                            });
+                            alert(`⭐ LEVEL UP! You reached Level ${data.level}!`);
+                            window.location.reload(); 
+                        }, 500);
+                    } else if (data.new_achievement) {
                         setTimeout(() => {
                             confetti({
                                 particleCount: 200,
@@ -146,7 +187,7 @@
                                 colors: ['#f59e0b', '#ffffff']
                             });
                             alert(`🎉 Achievement Unlocked: ${data.new_achievement}!`);
-                            window.location.reload(); // Refresh to show the new badge
+                            window.location.reload(); 
                         }, 500);
                     }
 
@@ -156,6 +197,10 @@
 
                     document.querySelector('.text-7xl').innerText = data.count;
                     document.getElementById('freezeBadge').innerHTML = `❄️ ${data.freezes} Freezes`;
+                    document.getElementById('levelBadge').innerHTML = `⭐ Level ${data.level}`;
+                    document.getElementById('xpBar').style.width = `${data.xp_progress}%`;
+                    document.getElementById('xpPercent').innerText = `${Math.round(data.xp_progress)}%`;
+                    document.querySelectorAll('.text-lg.font-bold.text-slate-300')[1].innerText = data.xp;
                 }
             } catch (error) {
                 console.error("Failed to update streak", error);

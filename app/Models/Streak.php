@@ -12,9 +12,28 @@ class Streak extends Model
         'freezes_available',
         'last_commit_date',
         'achievements',
+        'xp',
+        'level',
     ];
 
     protected $casts = [
         'achievements' => 'array',
     ];
+
+    public function getXpForNextLevel()
+    {
+        // Simple formula: Level 1 -> 100, Level 2 -> 250, Level 3 -> 500
+        return $this->level * 100 + (pow($this->level, 2) * 50);
+    }
+
+    public function getLevelProgress()
+    {
+        $nextLevelXp = $this->getXpForNextLevel();
+        $prevLevelXp = $this->level == 1 ? 0 : ($this->level - 1) * 100 + (pow($this->level - 1, 2) * 50);
+        
+        $currentLevelXp = $this->xp - $prevLevelXp;
+        $neededXp = $nextLevelXp - $prevLevelXp;
+        
+        return min(100, max(0, ($currentLevelXp / $neededXp) * 100));
+    }
 }
