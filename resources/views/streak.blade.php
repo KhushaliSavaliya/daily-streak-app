@@ -94,6 +94,23 @@
         @endif
 
         <div class="mt-8">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-xs font-bold uppercase text-slate-500 tracking-tighter">Daily Quests</h3>
+                <button onclick="openEditModal()" class="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold uppercase">Edit</button>
+            </div>
+            <div class="space-y-2">
+                @foreach($streak->daily_tasks as $index => $task)
+                    <div class="flex items-center gap-3 bg-slate-700/30 p-3 rounded-xl border border-slate-700/50 group hover:border-indigo-500/30 transition-all">
+                        <input type="checkbox" onchange="toggleTask({{ $index }}, this.checked)" 
+                            {{ $task['completed'] ? 'checked' : '' }}
+                            class="w-5 h-5 rounded border-slate-600 bg-slate-800 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-slate-800">
+                        <span class="text-sm {{ $task['completed'] ? 'text-slate-500 line-through' : 'text-slate-300' }} transition-all">{{ $task['text'] }}</span>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+        <div class="mt-8">
             <div class="flex justify-between items-center mb-2">
                 <h3 class="text-xs font-bold uppercase text-slate-500 tracking-tighter">Last 365 days</h3>
                 <span class="text-[10px] text-slate-500">More activity = Brighter</span>
@@ -117,6 +134,26 @@
                         </div>
                     @endforeach
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Tasks Modal -->
+    <div id="editModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl">
+            <h3 class="text-lg font-bold mb-4">Edit Daily Quests</h3>
+            <div class="space-y-4 mb-6">
+                @foreach($streak->daily_tasks as $index => $task)
+                <div>
+                    <label class="text-[10px] font-bold uppercase text-slate-500 mb-1 block">Task {{ $index + 1 }}</label>
+                    <input type="text" value="{{ $task['text'] }}" 
+                        class="task-input w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+                </div>
+                @endforeach
+            </div>
+            <div class="flex gap-3">
+                <button onclick="closeEditModal()" class="flex-1 px-4 py-2 rounded-xl bg-slate-700 font-bold text-sm hover:bg-slate-600">Cancel</button>
+                <button onclick="saveTasks()" class="flex-1 px-4 py-2 rounded-xl bg-indigo-600 font-bold text-sm hover:bg-indigo-500">Save</button>
             </div>
         </div>
     </div>
@@ -206,7 +243,72 @@
                 console.error("Failed to update streak", error);
             }
         };
+
+        async function toggleTask(index, completed) {
+            try {
+                const response = await fetch('/streak/tasks/update', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ index, completed })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const span = event.target.nextElementSibling;
+                    if (completed) {
+                        span.classList.add('text-slate-500', 'line-through');
+                        span.classList.remove('text-slate-300');
+                    } else {
+                        span.classList.remove('text-slate-500', 'line-through');
+                        span.classList.add('text-slate-300');
+                    }
+
+                    if (data.all_completed) {
+                        confetti({
+                            particleCount: 50,
+                            spread: 50,
+                            origin: { y: 0.8 },
+                            colors: ['#a855f7']
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to update task", error);
+            }
+        }
+
+        function openEditModal() {
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+        }
+
+        async function saveTasks() {
+            const inputs = document.querySelectorAll('.task-input');
+            const tasks = Array.from(inputs).map(input => input.value);
+            
+            try {
+                const response = await fetch('/streak/tasks/save', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ tasks })
+                });
+                
+                if (response.ok) {
+                    window.location.reload();
+                }
+            } catch (error) {
+                console.error("Failed to save tasks", error);
+            }
+        }
     </script>
 </body>
-
 </html>

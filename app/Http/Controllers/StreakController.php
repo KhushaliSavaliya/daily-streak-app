@@ -12,6 +12,7 @@ class StreakController extends Controller
     public function index()
     {
         $streak = Streak::firstOrCreate(['id' => 1]);
+        $streak->resetDailyTasks();
         
         // 1. Handle Streak Logic (Breaks/Freezes)
         $today = now()->startOfDay();
@@ -104,6 +105,7 @@ class StreakController extends Controller
             $streak->xp += 10;
             $leveledUp = false;
             $nextLevelThreshold = $streak->getXpForNextLevel();
+            $bonusXp = 0; // Initialize bonusXp
             
             if ($streak->xp >= $nextLevelThreshold) {
                 $streak->level++;
@@ -125,7 +127,55 @@ class StreakController extends Controller
             'level' => $streak->level,
             'leveled_up' => $leveledUp,
             'next_level_xp' => $streak->getXpForNextLevel(),
-            'xp_progress' => $streak->getLevelProgress()
+            'xp_progress' => $streak->getLevelProgress(),
+            'bonus_xp' => $bonusXp ?? 0
         ]);
+    }
+
+    public function updateTasks(Request $request)
+    {
+        $streak = Streak::find(1);
+        $tasks = $streak->daily_tasks;
+        $index = $request->index;
+
+        if (isset($tasks[$index])) {
+            $tasks[$index]['completed'] = $request->completed;
+            $streak->update(['daily_tasks' => $tasks]);
+            
+            // If all tasks are completed, award a small XP bonus!
+            $allCompleted = collect($tasks)->every('completed', true);
+            $bonusAwarded = false;
+            
+            if ($allCompleted) {
+                // We could add logic here or just let the user know
+            }
+
+            return response()->json([
+                'success' => true,
+                'all_completed' => $allCompleted
+            ]);
+        }
+
+        return response()->json(['success' => false], 400);
+    }
+
+    public function saveTaskNames(Request $request)
+    {
+        $streak = Streak::find(1);
+        $newTasks = $request->tasks; // Array of strings
+        
+        $currentTasks = $streak->daily_tasks;
+        $updatedTasks = [];
+        
+        foreach ($newTasks as $i => $text) {
+            $updatedTasks[] = [
+                'text' => $text ?: ($currentTasks[$i]['text'] ?? "Task " . ($i + 1)),
+                'completed' => $currentTasks[$i]['completed'] ?? false
+            ];
+        }
+        
+        $streak->update(['daily_tasks' => $updatedTasks]);
+        
+        return response()->json(['success' => true]);
     }
 }
