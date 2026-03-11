@@ -103,6 +103,7 @@ class StreakController extends Controller
             
             // Award XP
             $streak->xp += 10;
+            $streak->coins += 5; // Award coins for daily contribution
             $leveledUp = false;
             $nextLevelThreshold = $streak->getXpForNextLevel();
             $bonusXp = 0; // Initialize bonusXp
@@ -124,6 +125,7 @@ class StreakController extends Controller
             'freezes' => $streak->freezes_available,
             'new_achievement' => $newAchievement ?? null,
             'xp' => $streak->xp,
+            'coins' => $streak->coins,
             'level' => $streak->level,
             'leveled_up' => $leveledUp,
             'next_level_xp' => $streak->getXpForNextLevel(),
@@ -139,24 +141,78 @@ class StreakController extends Controller
         $index = $request->index;
 
         if (isset($tasks[$index])) {
+            $alreadyCompleted = $tasks[$index]['completed'];
             $tasks[$index]['completed'] = $request->completed;
-            $streak->update(['daily_tasks' => $tasks]);
+            $streak->daily_tasks = $tasks;
             
-            // If all tasks are completed, award a small XP bonus!
-            $allCompleted = collect($tasks)->every('completed', true);
+            $xpAwarded = 0;
+            $coinsAwarded = 0;
             $bonusAwarded = false;
-            
-            if ($allCompleted) {
-                // We could add logic here or just let the user know
+
+            if ($request->completed && !$alreadyCompleted) {
+                // Award rewards for completing a task
+                $xpAwarded = 2;
+                $coinsAwarded = 1;
+                $streak->xp += $xpAwarded;
+                $streak->coins += $coinsAwarded;
             }
+
+            // If all tasks are completed, award a bonus!
+            $allCompleted = collect($tasks)->every('completed', true);
+            
+            if ($allCompleted && $request->completed && !$alreadyCompleted) {
+                $xpAwarded += 10;
+                $coinsAwarded += 5;
+                $streak->xp += 10;
+                $streak->coins += 5;
+                $bonusAwarded = true;
+            }
+
+            $leveledUp = false;
+            if ($streak->xp >= $streak->getXpForNextLevel()) {
+                $streak->level++;
+                $leveledUp = true;
+                $streak->increment('freezes_available');
+            }
+
+            $streak->save();
 
             return response()->json([
                 'success' => true,
-                'all_completed' => $allCompleted
+                'all_completed' => $allCompleted,
+                'xp_awarded' => $xpAwarded,
+                'coins_awarded' => $coinsAwarded,
+                'bonus_awarded' => $bonusAwarded,
+                'xp' => $streak->xp,
+                'coins' => $streak->coins,
+                'level' => $streak->level,
+                'leveled_up' => $leveledUp,
+                'xp_progress' => $streak->getLevelProgress()
             ]);
         }
 
         return response()->json(['success' => false], 400);
+    }
+
+    public function buyFreeze()
+    {
+        $streak = Streak::find(1);
+        $cost = 50; // Cost of 1 freeze
+
+        if ($streak->coins >= $cost) {
+            $streak->decrement('coins', $cost);
+            $streak->increment('freezes_available');
+            return response()->json([
+                'success' => true,
+                'coins' => $streak->coins,
+                'freezes' => $streak->freezes_available
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Not enough coins!'
+        ], 400);
     }
 
     public function saveTaskNames(Request $request)

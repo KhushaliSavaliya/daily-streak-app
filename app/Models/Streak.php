@@ -14,6 +14,7 @@ class Streak extends Model
         'achievements',
         'xp',
         'level',
+        'coins',
         'daily_tasks',
         'last_task_reset',
     ];

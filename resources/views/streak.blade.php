@@ -19,6 +19,10 @@
                 class="flex items-center gap-1 bg-purple-500/20 text-purple-400 px-3 py-1 rounded-full text-xs font-bold border border-purple-500/30">
                 ⭐ Level {{ $streak->level }}
             </div>
+            <div id="coinBadge"
+                class="flex items-center gap-1 bg-yellow-500/20 text-yellow-500 px-3 py-1 rounded-full text-xs font-bold border border-yellow-500/30">
+                🪙 <span id="coinCount">{{ $streak->coins }}</span> Coins
+            </div>
         </div>
 
         <div class="text-center">
@@ -34,9 +38,14 @@
                 <div class="border-l border-slate-700"></div>
                 <div class="text-center">
                     <div class="text-xs text-slate-500 font-bold uppercase">XP</div>
-                    <div class="text-lg font-bold text-slate-300">{{ $streak->xp }}</div>
+                    <div class="text-lg font-bold text-slate-300" id="xpTotal">{{ $streak->xp }}</div>
                 </div>
             </div>
+
+            <button onclick="openShop()" 
+                class="w-full mb-6 py-2 rounded-xl bg-slate-700/50 border border-slate-600 hover:border-yellow-500/50 hover:bg-yellow-500/10 transition-all group">
+                <span class="text-xs font-bold uppercase text-slate-400 group-hover:text-yellow-500">🛒 Streak Shop</span>
+            </button>
 
             @php
                 $milestones = [7, 30, 100];
@@ -157,6 +166,48 @@
             </div>
         </div>
     </div>
+
+    <!-- Streak Shop Modal -->
+    <div id="shopModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-black italic tracking-tighter">STREAK SHOP</h3>
+                <div class="bg-yellow-500/20 text-yellow-500 px-3 py-1 rounded-full text-xs font-bold border border-yellow-500/30">
+                    🪙 <span id="shopCoinCount">{{ $streak->coins }}</span>
+                </div>
+            </div>
+            
+            <div class="space-y-4 mb-6">
+                <div class="bg-slate-900/50 border border-slate-700 p-4 rounded-2xl flex items-center justify-between group hover:border-blue-500/30 transition-all">
+                    <div class="flex items-center gap-3">
+                        <div class="text-2xl">❄️</div>
+                        <div>
+                            <div class="font-bold text-sm text-slate-200">Streak Freeze</div>
+                            <div class="text-[10px] text-slate-500 font-bold uppercase">Protect your streak</div>
+                        </div>
+                    </div>
+                    <button onclick="buyFreeze()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-xl font-bold text-xs transition-all active:scale-95">
+                        🪙 50
+                    </button>
+                </div>
+
+                <div class="bg-slate-900/10 border border-slate-700/50 p-4 rounded-2xl flex items-center justify-between opacity-50 grayscale">
+                    <div class="flex items-center gap-3">
+                        <div class="text-2xl">🎩</div>
+                        <div>
+                            <div class="font-bold text-sm text-slate-200">Cosmetic: Crown</div>
+                            <div class="text-[10px] text-slate-500 font-bold uppercase">Coming Soon</div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-800 px-4 py-2 rounded-xl font-bold text-xs">
+                        🪙 250
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="closeShop()" class="w-full px-4 py-2 rounded-xl bg-slate-700 font-bold text-sm hover:bg-slate-600 transition-all">Close Shop</button>
+        </div>
+    </div>
     
     <style>
         .custom-scrollbar::-webkit-scrollbar {
@@ -237,7 +288,9 @@
                     document.getElementById('levelBadge').innerHTML = `⭐ Level ${data.level}`;
                     document.getElementById('xpBar').style.width = `${data.xp_progress}%`;
                     document.getElementById('xpPercent').innerText = `${Math.round(data.xp_progress)}%`;
-                    document.querySelectorAll('.text-lg.font-bold.text-slate-300')[1].innerText = data.xp;
+                    document.getElementById('xpTotal').innerText = data.xp;
+                    document.getElementById('coinCount').innerText = data.coins;
+                    document.getElementById('shopCoinCount').innerText = data.coins;
                 }
             } catch (error) {
                 console.error("Failed to update streak", error);
@@ -274,6 +327,20 @@
                             colors: ['#a855f7']
                         });
                     }
+
+                    // Update Rewards
+                    if (data.xp_awarded > 0) {
+                        document.getElementById('xpTotal').innerText = data.xp;
+                        document.getElementById('xpBar').style.width = `${data.xp_progress}%`;
+                        document.getElementById('xpPercent').innerText = `${Math.round(data.xp_progress)}%`;
+                        document.getElementById('coinCount').innerText = data.coins;
+                        document.getElementById('shopCoinCount').innerText = data.coins;
+
+                        if (data.leveled_up) {
+                            alert(`⭐ LEVEL UP! You reached Level ${data.level}!`);
+                            window.location.reload();
+                        }
+                    }
                 }
             } catch (error) {
                 console.error("Failed to update task", error);
@@ -307,6 +374,47 @@
                 }
             } catch (error) {
                 console.error("Failed to save tasks", error);
+            }
+        }
+
+        function openShop() {
+            document.getElementById('shopModal').classList.remove('hidden');
+        }
+
+        function closeShop() {
+            document.getElementById('shopModal').classList.add('hidden');
+        }
+
+        async function buyFreeze() {
+            try {
+                const response = await fetch('/streak/shop/buy-freeze', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 },
+                        colors: ['#3b82f6', '#ffffff']
+                    });
+                    
+                    document.getElementById('freezeBadge').innerHTML = `❄️ ${data.freezes} Freezes`;
+                    document.getElementById('coinCount').innerText = data.coins;
+                    document.getElementById('shopCoinCount').innerText = data.coins;
+                    
+                    alert("❄️ Freeze purchased successfully!");
+                } else {
+                    alert(data.message || "Failed to buy freeze");
+                }
+            } catch (error) {
+                console.error("Failed to buy freeze", error);
             }
         }
     </script>
