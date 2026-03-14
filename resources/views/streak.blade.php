@@ -42,9 +42,10 @@
                 </div>
             </div>
 
-            <button onclick="openShop()" 
+            <button onclick="openShop()"
                 class="w-full mb-6 py-2 rounded-xl bg-slate-700/50 border border-slate-600 hover:border-yellow-500/50 hover:bg-yellow-500/10 transition-all group">
-                <span class="text-xs font-bold uppercase text-slate-400 group-hover:text-yellow-500">🛒 Streak Shop</span>
+                <span class="text-xs font-bold uppercase text-slate-400 group-hover:text-yellow-500">🛒 Streak
+                    Shop</span>
             </button>
 
             @php
@@ -52,7 +53,7 @@
                 $nextMilestone = collect($milestones)->first(fn($m) => $m > $streak->count) ?? 365;
                 $prevMilestone = collect($milestones)->reverse()->first(fn($m) => $m <= $streak->count) ?? 0;
                 $progress = (($streak->count - $prevMilestone) / ($nextMilestone - $prevMilestone)) * 100;
-                
+
                 $xpProgress = $streak->getLevelProgress();
             @endphp
 
@@ -62,7 +63,8 @@
                     <span>{{ round($progress) }}%</span>
                 </div>
                 <div class="w-full bg-slate-700 h-1.5 rounded-full overflow-hidden">
-                    <div id="progressBar" class="bg-indigo-500 h-full transition-all duration-1000" style="width: {{ $progress }}%"></div>
+                    <div id="progressBar" class="bg-indigo-500 h-full transition-all duration-1000"
+                        style="width: {{ $progress }}%"></div>
                 </div>
             </div>
 
@@ -72,7 +74,8 @@
                     <span id="xpPercent">{{ round($xpProgress) }}%</span>
                 </div>
                 <div class="w-full bg-slate-700 h-1.5 rounded-full overflow-hidden">
-                    <div id="xpBar" class="bg-purple-500 h-full transition-all duration-1000" style="width: {{ $xpProgress }}%"></div>
+                    <div id="xpBar" class="bg-purple-500 h-full transition-all duration-1000"
+                        style="width: {{ $xpProgress }}%"></div>
                 </div>
             </div>
 
@@ -88,32 +91,35 @@
             </button>
         </div>
 
-        @if($streak->achievements && count($streak->achievements) > 0)
-        <div class="mt-8">
-            <h3 class="text-xs font-bold uppercase text-slate-500 tracking-tighter mb-3">Achievements</h3>
-            <div class="flex flex-wrap gap-2">
-                @foreach($streak->achievements as $achievement)
-                    <div title="Earned on {{ $achievement['earned_at'] }}" 
-                        class="bg-amber-500/20 text-amber-500 border border-amber-500/30 px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1">
-                        🏆 {{ $achievement['name'] }}
-                    </div>
-                @endforeach
+        @if ($streak->achievements && count($streak->achievements) > 0)
+            <div class="mt-8">
+                <h3 class="text-xs font-bold uppercase text-slate-500 tracking-tighter mb-3">Achievements</h3>
+                <div class="flex flex-wrap gap-2">
+                    @foreach ($streak->achievements as $achievement)
+                        <div title="Earned on {{ $achievement['earned_at'] }}"
+                            class="bg-amber-500/20 text-amber-500 border border-amber-500/30 px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1">
+                            🏆 {{ $achievement['name'] }}
+                        </div>
+                    @endforeach
+                </div>
             </div>
-        </div>
         @endif
 
         <div class="mt-8">
             <div class="flex justify-between items-center mb-3">
                 <h3 class="text-xs font-bold uppercase text-slate-500 tracking-tighter">Daily Quests</h3>
-                <button onclick="openEditModal()" class="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold uppercase">Edit</button>
+                <button onclick="openEditModal()"
+                    class="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold uppercase">Edit</button>
             </div>
             <div class="space-y-2">
-                @foreach($streak->daily_tasks as $index => $task)
-                    <div class="flex items-center gap-3 bg-slate-700/30 p-3 rounded-xl border border-slate-700/50 group hover:border-indigo-500/30 transition-all">
-                        <input type="checkbox" onchange="toggleTask({{ $index }}, this.checked)" 
+                @foreach ($streak->daily_tasks as $index => $task)
+                    <div
+                        class="flex items-center gap-3 bg-slate-700/30 p-3 rounded-xl border border-slate-700/50 group hover:border-indigo-500/30 transition-all">
+                        <input type="checkbox" onchange="toggleTask({{ $index }}, this.checked)"
                             {{ $task['completed'] ? 'checked' : '' }}
                             class="w-5 h-5 rounded border-slate-600 bg-slate-800 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-slate-800">
-                        <span class="text-sm {{ $task['completed'] ? 'text-slate-500 line-through' : 'text-slate-300' }} transition-all">{{ $task['text'] }}</span>
+                        <span
+                            class="text-sm {{ $task['completed'] ? 'text-slate-500 line-through' : 'text-slate-300' }} transition-all">{{ $task['text'] }}</span>
                     </div>
                 @endforeach
             </div>
@@ -124,21 +130,26 @@
                 <h3 class="text-xs font-bold uppercase text-slate-500 tracking-tighter">Last 365 days</h3>
                 <span class="text-[10px] text-slate-500">More activity = Brighter</span>
             </div>
-            
+
             <div class="overflow-x-auto pb-2 custom-scrollbar">
                 <div class="grid grid-rows-7 grid-flow-col gap-1 w-max">
                     @foreach ($history as $date => $count)
                         @php
-                            // Determine color intensity
-                            $color = 'bg-slate-700'; // Default empty
-                            if ($count > 0 && $count <= 2) $color = 'bg-indigo-900';
-                            if ($count > 2 && $count <= 5) $color = 'bg-indigo-600';
-                            if ($count > 5) $color = 'bg-indigo-400';
-                            
+                            $color = 'bg-slate-700';
+                            if ($count > 0 && $count <= 2) {
+                                $color = 'bg-indigo-900';
+                            }
+                            if ($count > 2 && $count <= 5) {
+                                $color = 'bg-indigo-600';
+                            }
+                            if ($count > 5) {
+                                $color = 'bg-indigo-400';
+                            }
+
                             $isToday = $date == now()->format('Y-m-d');
                         @endphp
-                        
-                        <div title="{{ $date }}: {{ $count }} contributions" 
+
+                        <div title="{{ $date }}: {{ $count }} contributions"
                             class="w-3 h-3 rounded-[2px] {{ $color }} {{ $isToday ? 'ring-[1px] ring-white/50' : '' }} transition-colors hover:ring-1 hover:ring-white">
                         </div>
                     @endforeach
@@ -147,38 +158,43 @@
         </div>
     </div>
 
-    <!-- Edit Tasks Modal -->
-    <div id="editModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div id="editModal"
+        class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-slate-800 border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl">
             <h3 class="text-lg font-bold mb-4">Edit Daily Quests</h3>
             <div class="space-y-4 mb-6">
-                @foreach($streak->daily_tasks as $index => $task)
-                <div>
-                    <label class="text-[10px] font-bold uppercase text-slate-500 mb-1 block">Task {{ $index + 1 }}</label>
-                    <input type="text" value="{{ $task['text'] }}" 
-                        class="task-input w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
-                </div>
+                @foreach ($streak->daily_tasks as $index => $task)
+                    <div>
+                        <label class="text-[10px] font-bold uppercase text-slate-500 mb-1 block">Task
+                            {{ $index + 1 }}</label>
+                        <input type="text" value="{{ $task['text'] }}"
+                            class="task-input w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+                    </div>
                 @endforeach
             </div>
             <div class="flex gap-3">
-                <button onclick="closeEditModal()" class="flex-1 px-4 py-2 rounded-xl bg-slate-700 font-bold text-sm hover:bg-slate-600">Cancel</button>
-                <button onclick="saveTasks()" class="flex-1 px-4 py-2 rounded-xl bg-indigo-600 font-bold text-sm hover:bg-indigo-500">Save</button>
+                <button onclick="closeEditModal()"
+                    class="flex-1 px-4 py-2 rounded-xl bg-slate-700 font-bold text-sm hover:bg-slate-600">Cancel</button>
+                <button onclick="saveTasks()"
+                    class="flex-1 px-4 py-2 rounded-xl bg-indigo-600 font-bold text-sm hover:bg-indigo-500">Save</button>
             </div>
         </div>
     </div>
 
-    <!-- Streak Shop Modal -->
-    <div id="shopModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div id="shopModal"
+        class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-slate-800 border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-xl font-black italic tracking-tighter">STREAK SHOP</h3>
-                <div class="bg-yellow-500/20 text-yellow-500 px-3 py-1 rounded-full text-xs font-bold border border-yellow-500/30">
+                <div
+                    class="bg-yellow-500/20 text-yellow-500 px-3 py-1 rounded-full text-xs font-bold border border-yellow-500/30">
                     🪙 <span id="shopCoinCount">{{ $streak->coins }}</span>
                 </div>
             </div>
-            
+
             <div class="space-y-4 mb-6">
-                <div class="bg-slate-900/50 border border-slate-700 p-4 rounded-2xl flex items-center justify-between group hover:border-blue-500/30 transition-all">
+                <div
+                    class="bg-slate-900/50 border border-slate-700 p-4 rounded-2xl flex items-center justify-between group hover:border-blue-500/30 transition-all">
                     <div class="flex items-center gap-3">
                         <div class="text-2xl">❄️</div>
                         <div>
@@ -186,12 +202,14 @@
                             <div class="text-[10px] text-slate-500 font-bold uppercase">Protect your streak</div>
                         </div>
                     </div>
-                    <button onclick="buyFreeze()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-xl font-bold text-xs transition-all active:scale-95">
+                    <button onclick="buyFreeze()"
+                        class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-xl font-bold text-xs transition-all active:scale-95">
                         🪙 50
                     </button>
                 </div>
 
-                <div class="bg-slate-900/10 border border-slate-700/50 p-4 rounded-2xl flex items-center justify-between opacity-50 grayscale">
+                <div
+                    class="bg-slate-900/10 border border-slate-700/50 p-4 rounded-2xl flex items-center justify-between opacity-50 grayscale">
                     <div class="flex items-center gap-3">
                         <div class="text-2xl">🎩</div>
                         <div>
@@ -205,24 +223,29 @@
                 </div>
             </div>
 
-            <button onclick="closeShop()" class="w-full px-4 py-2 rounded-xl bg-slate-700 font-bold text-sm hover:bg-slate-600 transition-all">Close Shop</button>
+            <button onclick="closeShop()"
+                class="w-full px-4 py-2 rounded-xl bg-slate-700 font-bold text-sm hover:bg-slate-600 transition-all">Close
+                Shop</button>
         </div>
     </div>
-    
+
     <style>
         .custom-scrollbar::-webkit-scrollbar {
             height: 6px;
         }
+
         .custom-scrollbar::-webkit-scrollbar-track {
-            background: #1e293b; 
+            background: #1e293b;
             border-radius: 4px;
         }
+
         .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #475569; 
+            background: #475569;
             border-radius: 4px;
         }
+
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #64748b; 
+            background: #64748b;
         }
     </style>
 
@@ -251,7 +274,9 @@
                     confetti({
                         particleCount: 150,
                         spread: 70,
-                        origin: { y: 0.6 },
+                        origin: {
+                            y: 0.6
+                        },
                         colors: ['#6366f1', '#10b981', '#f59e0b']
                     });
 
@@ -260,22 +285,26 @@
                             confetti({
                                 particleCount: 200,
                                 spread: 100,
-                                origin: { y: 0.6 },
+                                origin: {
+                                    y: 0.6
+                                },
                                 colors: ['#a855f7', '#ffffff']
                             });
                             alert(`⭐ LEVEL UP! You reached Level ${data.level}!`);
-                            window.location.reload(); 
+                            window.location.reload();
                         }, 500);
                     } else if (data.new_achievement) {
                         setTimeout(() => {
                             confetti({
                                 particleCount: 200,
                                 spread: 100,
-                                origin: { y: 0.6 },
+                                origin: {
+                                    y: 0.6
+                                },
                                 colors: ['#f59e0b', '#ffffff']
                             });
                             alert(`🎉 Achievement Unlocked: ${data.new_achievement}!`);
-                            window.location.reload(); 
+                            window.location.reload();
                         }, 500);
                     }
 
@@ -305,9 +334,12 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ index, completed })
+                    body: JSON.stringify({
+                        index,
+                        completed
+                    })
                 });
-                
+
                 if (response.ok) {
                     const data = await response.json();
                     const span = event.target.nextElementSibling;
@@ -323,7 +355,9 @@
                         confetti({
                             particleCount: 50,
                             spread: 50,
-                            origin: { y: 0.8 },
+                            origin: {
+                                y: 0.8
+                            },
                             colors: ['#a855f7']
                         });
                     }
@@ -358,7 +392,7 @@
         async function saveTasks() {
             const inputs = document.querySelectorAll('.task-input');
             const tasks = Array.from(inputs).map(input => input.value);
-            
+
             try {
                 const response = await fetch('/streak/tasks/save', {
                     method: 'POST',
@@ -366,9 +400,11 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ tasks })
+                    body: JSON.stringify({
+                        tasks
+                    })
                 });
-                
+
                 if (response.ok) {
                     window.location.reload();
                 }
@@ -394,21 +430,23 @@
                         'Content-Type': 'application/json'
                     }
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (response.ok) {
                     confetti({
                         particleCount: 100,
                         spread: 70,
-                        origin: { y: 0.6 },
+                        origin: {
+                            y: 0.6
+                        },
                         colors: ['#3b82f6', '#ffffff']
                     });
-                    
+
                     document.getElementById('freezeBadge').innerHTML = `❄️ ${data.freezes} Freezes`;
                     document.getElementById('coinCount').innerText = data.coins;
                     document.getElementById('shopCoinCount').innerText = data.coins;
-                    
+
                     alert("❄️ Freeze purchased successfully!");
                 } else {
                     alert(data.message || "Failed to buy freeze");
@@ -419,4 +457,5 @@
         }
     </script>
 </body>
+
 </html>

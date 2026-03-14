@@ -14,7 +14,6 @@ class StreakController extends Controller
         $streak = Streak::firstOrCreate(['id' => 1]);
         $streak->resetDailyTasks();
         
-        // 1. Handle Streak Logic (Breaks/Freezes)
         $today = now()->startOfDay();
         $lastDate = $streak->last_commit_date ? Carbon::parse($streak->last_commit_date)->startOfDay() : null;
         $status = "Pending";
@@ -38,7 +37,6 @@ class StreakController extends Controller
         $startDate = now()->subDays(364)->format('Y-m-d');
         $endDate = now()->format('Y-m-d');
 
-        // Fetch all contributions for the last 365 days in one query
         $contributions = Contribution::whereBetween('day', [$startDate, $endDate])
             ->pluck('count', 'day')
             ->toArray();
@@ -57,22 +55,18 @@ class StreakController extends Controller
         $streak = Streak::find(1);
         $todayDate = now()->format('Y-m-d');
 
-        // Update Heatmap
         $contribution = Contribution::firstOrCreate(['day' => $todayDate]);
         $contribution->increment('count');
 
-        // Update Main Streak
         $lastDate = $streak->last_commit_date ? Carbon::parse($streak->last_commit_date)->format('Y-m-d') : null;
 
         if ($lastDate !== $todayDate) {
             $streak->increment('count');
             
-            // Track Best Streak
             if ($streak->count > $streak->best_streak) {
                 $streak->best_streak = $streak->count;
             }
             
-            // Achievement Logic
             $milestones = [
                 7 => ['name' => 'Week Warrior', 'reward' => 1],
                 30 => ['name' => 'Monthly Master', 'reward' => 3],
@@ -84,7 +78,6 @@ class StreakController extends Controller
                 $milestone = $milestones[$streak->count];
                 $currentAchievements = $streak->achievements ?? [];
                 
-                // check if already awarded (though based on count it shouldn't be, but safe check)
                 $alreadyAwarded = collect($currentAchievements)->contains('name', $milestone['name']);
 
                 if (!$alreadyAwarded) {
@@ -101,17 +94,15 @@ class StreakController extends Controller
             
             $streak->last_commit_date = now();
             
-            // Award XP
             $streak->xp += 10;
-            $streak->coins += 5; // Award coins for daily contribution
+            $streak->coins += 5;
             $leveledUp = false;
             $nextLevelThreshold = $streak->getXpForNextLevel();
-            $bonusXp = 0; // Initialize bonusXp
+            $bonusXp = 0;
             
             if ($streak->xp >= $nextLevelThreshold) {
                 $streak->level++;
                 $leveledUp = true;
-                // Bonus for leveling up? Maybe a freeze?
                 $streak->increment('freezes_available');
             }
 
@@ -150,14 +141,12 @@ class StreakController extends Controller
             $bonusAwarded = false;
 
             if ($request->completed && !$alreadyCompleted) {
-                // Award rewards for completing a task
                 $xpAwarded = 2;
                 $coinsAwarded = 1;
                 $streak->xp += $xpAwarded;
                 $streak->coins += $coinsAwarded;
             }
 
-            // If all tasks are completed, award a bonus!
             $allCompleted = collect($tasks)->every('completed', true);
             
             if ($allCompleted && $request->completed && !$alreadyCompleted) {
@@ -197,7 +186,7 @@ class StreakController extends Controller
     public function buyFreeze()
     {
         $streak = Streak::find(1);
-        $cost = 50; // Cost of 1 freeze
+        $cost = 50; 
 
         if ($streak->coins >= $cost) {
             $streak->decrement('coins', $cost);
@@ -218,7 +207,7 @@ class StreakController extends Controller
     public function saveTaskNames(Request $request)
     {
         $streak = Streak::find(1);
-        $newTasks = $request->tasks; // Array of strings
+        $newTasks = $request->tasks;
         
         $currentTasks = $streak->daily_tasks;
         $updatedTasks = [];

@@ -26,7 +26,6 @@ class Streak extends Model
 
     public function getXpForNextLevel()
     {
-        // Simple formula: Level 1 -> 100, Level 2 -> 250, Level 3 -> 500
         return $this->level * 100 + (pow($this->level, 2) * 50);
     }
 
@@ -51,7 +50,6 @@ class Streak extends Model
                 ['text' => 'Fix one bug', 'completed' => false],
             ];
             
-            // Keep the task text, but reset completion status
             $tasks = array_map(function($task) {
                 $task['completed'] = false;
                 return $task;
