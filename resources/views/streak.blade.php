@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<title>Daily Streak Managment</title>
+<title>Daily Streak Managment System</title>
 
 <head>
     <script src="https://cdn.tailwindcss.com"></script>
