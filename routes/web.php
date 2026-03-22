@@ -3,7 +3,7 @@
 use App\Http\Controllers\StreakController;
 use Illuminate\Support\Facades\Route;
 
-// streak routes
+// daily streak routes
 Route::get('/', [StreakController::class, 'index']);
 Route::post('/streak/update', [StreakController::class, 'store']);
 Route::post('/streak/tasks/update', [StreakController::class, 'updateTasks']);
